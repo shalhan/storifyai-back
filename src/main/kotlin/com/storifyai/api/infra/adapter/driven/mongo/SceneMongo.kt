@@ -9,10 +9,11 @@ import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import com.storifyai.api.app.scene.port.driven.*
-import com.storifyai.api.infra.adapter.driven.mongo.model.Project
-import com.storifyai.api.infra.adapter.driven.mongo.model.Prompt
-import com.storifyai.api.infra.adapter.driven.mongo.model.Scene
-import com.storifyai.api.infra.adapter.driven.mongo.model.Setting
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Project
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Prompt
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Scene
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Setting
+import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 import java.time.Instant
 
@@ -113,7 +114,7 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
         }
     }
 
-    override suspend fun findByProjectId(
+    override suspend fun findManyByProjectId(
         userId: String,
         projectId: String
     ): List<FindResult> {
@@ -132,27 +133,69 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
 
 
         result.collect {
-            newResult.add(FindResult(
-                it.id.toString(),
-                it.userId,
-                it.projectId,
-                SettingResult(
-                    isFull = it.setting.isFull,
-                    background = it.setting.background
-                ),
-                PromptResult(
-                    characters = it.prompt.characters,
-                    style = it.prompt.style,
-                    background = it.prompt.background,
-                    detail = it.prompt.detail
-                ),
-                createdDate = it.createdDate,
-                updatedDate = it.lastModifiedDate,
-                deletedDate = it.deletedDate
-            ))
+            newResult.add(newFindResult(it))
         }
 
         return newResult
+    }
+
+    override suspend fun findOne(userId: String, projectId: String, sceneId: String): FindResult? {
+        val filter = Filters.and(
+            Filters.eq(ObjectId(sceneId)),
+            Filters.eq(Scene::userId.name, userId),
+            Filters.eq(Scene::projectId.name, projectId),
+            Filters.or(
+                Filters.ne(Scene::deletedDate.name, null),
+                Filters.exists(Scene::deletedDate.name, false),
+            )
+        )
+
+        val result: Scene? = col.find<Scene>(filter)
+            .firstOrNull()
+
+        return when {
+            result != null -> newFindResult(result)
+            else -> null
+        }
+    }
+
+    override suspend fun findOneByReferenceId(userId: String, imageReferenceId: String): FindResult? {
+        val filter = Filters.and(
+            Filters.eq(Scene::userId.name, userId),
+            Filters.or(
+                Filters.ne(Scene::deletedDate.name, null),
+                Filters.exists(Scene::deletedDate.name, false),
+            )
+        )
+
+        val result: Scene? = col.find<Scene>(filter)
+            .firstOrNull()
+
+        return when {
+            result != null -> newFindResult(result)
+            else -> null
+        }
+    }
+
+    private fun newFindResult(scene: Scene): FindResult {
+        return FindResult(
+            scene.id.toString(),
+            scene.userId,
+            scene.projectId,
+            SettingResult(
+                isFull = scene.setting.isFull,
+                background = scene.setting.background
+            ),
+            PromptResult(
+                characters = scene.prompt.characters,
+                style = scene.prompt.style,
+                background = scene.prompt.background,
+                detail = scene.prompt.detail
+            ),
+            createdDate = scene.createdDate,
+            updatedDate = scene.lastModifiedDate,
+            deletedDate = scene.deletedDate
+        )
     }
 
 }

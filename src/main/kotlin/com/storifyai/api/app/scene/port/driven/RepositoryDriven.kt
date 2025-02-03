@@ -6,7 +6,9 @@ interface RepositoryDriven {
     suspend fun save(userId: String, projectId: String, param: SaveParam): String
     suspend fun update(userId: String,  projectId: String, sceneId: String, param: UpdateParam): UpdateResult
     suspend fun delete(userId: String, projectId: String, sceneId: String): String
-    suspend fun findByProjectId(userId: String, projectId: String): List<FindResult>
+    suspend fun findManyByProjectId(userId: String, projectId: String): List<FindResult>
+    suspend fun findOne(userId: String, projectId: String, sceneId: String): FindResult?
+    suspend fun findOneByReferenceId(userId: String, imageReferenceId: String): FindResult?
 }
 
 data class SaveParam(

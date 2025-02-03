@@ -1,8 +1,17 @@
 package com.storifyai.api.app.imagegeneration.port.driven
 
 interface OutboundDriven {
-    fun generate(param: GenerateParam): GenerateResult
+    fun generateImage(param: GenerateParam): GenerateResult
 }
 
-data class GenerateParam(val id: String)
-data class GenerateResult(val id: String)
+data class GenerateParam(
+    val userId: String,
+    val projectId: String,
+    val sceneId: String,
+    val generatedImageId: String,
+    val prompt: String,
+    val width: Int,
+    val height: Int,
+    val numOfImages: Int,
+)
+data class GenerateResult(val referenceId: String)

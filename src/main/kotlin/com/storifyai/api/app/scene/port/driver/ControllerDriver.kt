@@ -6,7 +6,7 @@ interface ControllerDriver {
     suspend fun save(userId: String, projectId: String, request: SaveRequest): SaveResponse
     suspend fun update(userId: String, projectId: String, sceneId: String, request: UpdateRequest): UpdateResponse
     suspend fun delete(userId: String, projectId: String, sceneId: String): DeleteResponse
-    suspend fun findByProjectId(userId: String, projectId: String): List<FindResponse>
+    suspend fun findManyByProjectId(userId: String, projectId: String): List<FindResponse>
 }
 
 data class SaveRequest(

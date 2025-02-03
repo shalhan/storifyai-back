@@ -1,4 +1,4 @@
-package com.storifyai.api.infra.adapter.driven.mongo.model
+package com.storifyai.api.infra.adapter.driven.mongo.entity
 
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId

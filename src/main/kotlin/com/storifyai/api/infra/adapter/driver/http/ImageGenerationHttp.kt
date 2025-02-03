@@ -7,7 +7,7 @@ import com.storifyai.api.app.imagegeneration.port.driver.UseCaseDriver
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/image-generations")
+@RequestMapping("/v1/image-generations")
 class ImageGenerationHttp(private val useCase: UseCaseDriver): ControllerDriver {
 
     @PostMapping("/")

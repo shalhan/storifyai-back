@@ -5,8 +5,11 @@ import java.time.Instant
 interface UseCaseDriver {
     suspend fun save(userId: String, projectId: String, param: SaveParam): String
     suspend fun update(userId: String, projectId: String, sceneId: String, param: UpdateParam): UpdateResult
+    suspend fun patch(userId: String, projectId: String, sceneId: String, param: PatchParam): PatchResult
     suspend fun delete(userId: String, projectId: String, sceneId: String): String
-    suspend fun findByProjectId(userId: String, projectId: String): List<FindResult>
+    suspend fun findOne(userId: String, projectId: String, sceneId: String): FindResult
+    suspend fun findOneByReferenceId(userId: String, imageReferenceId: String): FindResult
+    suspend fun findOneByProjectId(userId: String, projectId: String): List<FindResult>
 }
 
 data class SaveParam(
@@ -19,7 +22,21 @@ data class UpdateParam(
     val prompt: PromptParam,
 )
 
+data class PatchParam(
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
+    val setting: SettingParam? = null,
+    val prompt: PromptParam? = null,
+)
+
 data class UpdateResult(
+    val setting: SettingResult,
+    val prompt: PromptResult,
+
+    val updatedDate: Instant,
+)
+
+data class PatchResult(
     val setting: SettingResult,
     val prompt: PromptResult,
 

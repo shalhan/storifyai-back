@@ -27,7 +27,7 @@ class SceneUseCase(private val repoAdapter: RepositoryDriven): UseCaseDriver {
         ))
     }
 
-    override suspend fun update(userId: String, projectId: String, sceneId: String, param: UpdateParam): UpdateResult {
+    override suspend fun update(userId: String, projectId: String, sceneId: String, param: PatchParam): UpdateResult {
         val result = repoAdapter.update(userId, projectId, sceneId, _UpdateParam(
             setting = _SettingParam(
                 isFull = param.setting.isFull,
@@ -60,8 +60,8 @@ class SceneUseCase(private val repoAdapter: RepositoryDriven): UseCaseDriver {
         return repoAdapter.delete(userId, projectId, sceneId)
     }
 
-    override suspend fun findByProjectId(userId: String, projectId: String): List<FindResult> {
-        val result: List<_FindResult> = repoAdapter.findByProjectId(userId, projectId)
+    override suspend fun findOneByProjectId(userId: String, projectId: String): List<FindResult> {
+        val result: List<_FindResult> = repoAdapter.findManyByProjectId(userId, projectId)
 
         return result.map {
             FindResult(

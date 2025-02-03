@@ -5,7 +5,6 @@ import com.mongodb.client.result.InsertOneResult
 import com.mongodb.client.model.Projections
 import com.mongodb.client.model.Sorts
 import com.mongodb.client.model.Updates
-import com.mongodb.client.result.DeleteResult
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
@@ -14,8 +13,9 @@ import com.storifyai.api.app.project.port.driven.RepositoryDriven
 import com.storifyai.api.app.project.port.driven.UpdateResult
 import com.storifyai.api.app.project.port.driven.UpdateParam
 import com.mongodb.client.result.UpdateResult as _UpdateResult
-import com.storifyai.api.infra.adapter.driven.mongo.model.Project
-import com.storifyai.api.infra.adapter.driven.mongo.model.Scene
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Project
+import com.storifyai.api.infra.adapter.driven.mongo.entity.Scene
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 import java.time.Instant

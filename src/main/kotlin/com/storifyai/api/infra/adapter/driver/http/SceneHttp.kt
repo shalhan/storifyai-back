@@ -6,7 +6,7 @@ import com.storifyai.api.app.scene.port.driver.*
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/projects/{projectId}/scenes")
+@RequestMapping("/v1/projects/{projectId}/scenes")
 class SceneHttp(private val useCase: UseCaseDriver): ControllerDriver {
 
     @PostMapping("")
@@ -67,8 +67,8 @@ class SceneHttp(private val useCase: UseCaseDriver): ControllerDriver {
     }
 
     @GetMapping("")
-    override suspend fun findByProjectId(@RequestHeader userId: String, @PathVariable projectId: String): List<FindResponse> {
-        val result: List<FindResult> = useCase.findByProjectId(userId, projectId)
+    override suspend fun findManyByProjectId(@RequestHeader userId: String, @PathVariable projectId: String): List<FindResponse> {
+        val result: List<FindResult> = useCase.findOneByProjectId(userId, projectId)
 
         return result.map {
             FindResponse(

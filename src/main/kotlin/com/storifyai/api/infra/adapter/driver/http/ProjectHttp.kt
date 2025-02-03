@@ -4,7 +4,7 @@ import com.storifyai.api.app.project.port.driver.*
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/v1/projects")
 class ProjectHttp(private val useCase: UseCaseDriver): ControllerDriver {
 
     @PostMapping("")
