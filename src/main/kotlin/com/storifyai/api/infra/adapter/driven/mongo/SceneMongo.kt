@@ -9,7 +9,6 @@ import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import com.storifyai.api.app.scene.port.driven.*
-import com.storifyai.api.infra.adapter.driven.mongo.entity.Project
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Prompt
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Scene
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Setting
@@ -92,11 +91,12 @@ class SceneMongo(private val client: MongoClient, private val db: MongoDatabase)
             Updates.set(Scene::lastModifiedDate.name, now)
         )
 
-        val result = col.findOneAndUpdate(filter, updates) ?: return throw IllegalStateException("Insert was not acknowledged")
+        val result = col.findOneAndUpdate(filter, updates) ?: throw IllegalStateException("Insert was not acknowledged")
 
         return UpdateResult(
             imageURL = result.imageUrl,
             imageReferenceId = result.imageReferenceId,
+            number = result.number,
             setting = SettingResult(
                 isFull = result.setting.isFull,
                 background = result.setting.background
@@ -223,6 +223,7 @@ class SceneMongo(private val client: MongoClient, private val db: MongoDatabase)
             scene.id.toString(),
             scene.userId,
             scene.projectId,
+            scene.number,
             scene.imageUrl,
             scene.imageReferenceId,
             SettingResult(
