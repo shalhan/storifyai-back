@@ -4,7 +4,7 @@ import com.storifyai.api.app.imagegeneration.port.driven.OutboundDriven
 import com.storifyai.api.app.imagegeneration.port.driver.*
 import com.storifyai.api.app.imagegeneration.port.driven.GenerateParam as _GenerateParam
 import com.storifyai.api.app.scene.port.driver.UseCaseDriver as _SceneUseCase
-import com.storifyai.api.app.scene.port.driver.PatchParam as _ScenePatchParam
+import com.storifyai.api.app.scene.port.driver.UpdateParam as _SceneUpdateParam
 
 class ImageGenerationUseCase(
     private val outboundAdapter: OutboundDriven,
@@ -12,7 +12,7 @@ class ImageGenerationUseCase(
 
 ) : UseCaseDriver {
     override suspend fun generate(userId: String, projectId: String, sceneId: String, param: GenerateParam): GenerateResult {
-        val scene = sceneUseCase.findOne(userId, projectId, sceneId) ?: throw IllegalStateException("scene not found")
+        sceneUseCase.findOne(userId, projectId, sceneId) ?: throw IllegalStateException("scene not found")
 
         // generate image
         val result = outboundAdapter.generateImage(_GenerateParam(
@@ -26,19 +26,19 @@ class ImageGenerationUseCase(
             numOfImages = param.numOfImages,
         ))
 
-        sceneUseCase.patch(userId, projectId, sceneId, _ScenePatchParam(
-            imageReferenceId = result.referenceId,
-        ))
+//        sceneUseCase.update(userId, projectId, sceneId, _SceneUpdateParam(
+//            imageReferenceId = result.referenceId,
+//        ))
 
         return GenerateResult(result.referenceId)
     }
 
     override suspend fun save(userId: String, param: SaveParam): SaveResult {
-        val scene = sceneUseCase.findOneByReferenceId(userId, param.referenceId) ?: throw IllegalStateException("scene not found")
+        sceneUseCase.findOneByReferenceId(userId, param.referenceId) ?: throw IllegalStateException("scene not found")
 
-        sceneUseCase.patch(userId, scene.projectId, scene.id, _ScenePatchParam(
-            imageURL = param.imageUrl,
-        ))
+//        sceneUseCase.update(userId, scene.projectId, scene.id, _SceneUpdateParam(
+//            imageURL = param.imageUrl,
+//        ))
 
         return SaveResult(param.referenceId, param.status, param.imageUrl)
     }

@@ -32,7 +32,14 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
+
+    implementation("io.jsonwebtoken:jjwt-api:0.12.3")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.3")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:5.3.0")
+    implementation("org.mongodb:mongodb-driver-core:5.3.0")
+
     implementation("org.mongodb:bson-kotlinx:5.3.0")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

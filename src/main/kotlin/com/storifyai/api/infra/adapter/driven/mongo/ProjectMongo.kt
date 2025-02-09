@@ -15,7 +15,6 @@ import com.storifyai.api.app.project.port.driven.UpdateParam
 import com.mongodb.client.result.UpdateResult as _UpdateResult
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Project
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Scene
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 import java.time.Instant
@@ -44,10 +43,7 @@ class ProjectMongo(db: MongoDatabase) : RepositoryDriven {
         val filter = Filters.and(
             Filters.eq("_id", ObjectId(projectId)),
             Filters.eq(Project::userId.name, userId),
-            Filters.or(
-                Filters.ne(Scene::deletedDate.name, null),
-                Filters.exists(Scene::deletedDate.name, false),
-            )
+            Filters.exists(Scene::deletedDate.name, false),
         )
         val updates = Updates.combine(
             Updates.set(Project::title.name, param.title),
@@ -66,13 +62,10 @@ class ProjectMongo(db: MongoDatabase) : RepositoryDriven {
         val filter = Filters.and(
             Filters.eq("_id", ObjectId(projectId)),
             Filters.eq(Project::userId.name, userId),
-            Filters.or(
-                Filters.ne(Scene::deletedDate.name, null),
-                Filters.exists(Scene::deletedDate.name, false),
-            )
+            Filters.exists(Scene::deletedDate.name, false),
         )
 
-        val update = Updates.set(Project::lastModifiedDate.name, Instant.now())
+        val update = Updates.set(Project::deletedDate.name, Instant.now())
 
         val result: _UpdateResult = col.updateOne(filter, update)
 
@@ -86,10 +79,7 @@ class ProjectMongo(db: MongoDatabase) : RepositoryDriven {
         val newResult = mutableListOf<FindResult>()
         val filter = Filters.and(
             Filters.eq(Project::userId.name, userId),
-            Filters.or(
-                Filters.ne(Scene::deletedDate.name, null),
-                Filters.exists(Scene::deletedDate.name, false),
-            )
+            Filters.exists(Scene::deletedDate.name, false),
         )
         val projection = Projections.include(
             Project::title.name,
@@ -110,14 +100,11 @@ class ProjectMongo(db: MongoDatabase) : RepositoryDriven {
         return newResult
     }
 
-    override suspend fun findById(userId: String, projectId: String): FindResult {
+    override suspend fun findOneById(userId: String, projectId: String): FindResult? {
         val filter = Filters.and(
             Filters.eq(ObjectId(projectId)),
             Filters.eq(Project::userId.name, userId),
-            Filters.or(
-                Filters.ne(Scene::deletedDate.name, null),
-                Filters.exists(Scene::deletedDate.name, false),
-            )
+            Filters.exists(Scene::deletedDate.name, false),
         )
         val projection = Projections.include(
             Project::title.name,
@@ -127,15 +114,12 @@ class ProjectMongo(db: MongoDatabase) : RepositoryDriven {
             Project::deletedDate.name
         )
 
-        val result: Project? = col.find<Project>(filter)
+        val result = col.find<Project>(filter)
             .projection(projection)
-            .firstOrNull()
-        
-        return when {
-            result != null -> FindResult(
-                result.id.toString(), result.userId, result.title, result.createdDate, result.lastModifiedDate, result.deletedDate
-            )
-            else -> throw IllegalStateException("Project not found")
-        }
+            .firstOrNull() ?: return null
+
+        return FindResult(
+            result.id.toString(), result.userId, result.title, result.createdDate, result.lastModifiedDate, result.deletedDate
+        )
     }
 }

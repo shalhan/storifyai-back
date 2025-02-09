@@ -1,7 +1,9 @@
 package com.storifyai.api.infra.adapter.driver.http
 
 import com.storifyai.api.app.project.port.driver.*
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.HttpClientErrorException.NotFound
 
 @RestController
 @RequestMapping("/v1/projects")
@@ -40,8 +42,8 @@ class ProjectHttp(private val useCase: UseCaseDriver): ControllerDriver {
     }
 
     @GetMapping("/{projectId}")
-    override suspend fun findById(@RequestHeader userId: String, @PathVariable projectId: String): FindResponse {
-        val result: FindResult = useCase.findById(userId, projectId)
+    override suspend fun findOneById(@RequestHeader userId: String, @PathVariable projectId: String): FindResponse? {
+        val result = useCase.findOneById(userId, projectId) ?: throw NotFoundException()
 
         return FindResponse(
             result.id, result.userId, result.title, result.createdDate, result.updatedDate, result.deletedDate

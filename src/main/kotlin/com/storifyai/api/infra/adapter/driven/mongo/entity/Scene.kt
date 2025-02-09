@@ -11,6 +11,9 @@ data class Scene(
     val id: ObjectId = ObjectId(),
     val userId: String,
     val projectId: String,
+    val number: Int,
+    val imageUrl: String? = null,
+    val imageReferenceId: String? = null,
     val setting: Setting,
     val prompt: Prompt,
 

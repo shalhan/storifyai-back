@@ -6,7 +6,7 @@ import com.mongodb.client.model.Updates
 import com.mongodb.client.result.InsertOneResult
 import com.mongodb.client.result.UpdateResult as _UpdateResult
 import com.mongodb.kotlin.client.coroutine.FindFlow
-import com.mongodb.kotlin.client.coroutine.MongoCollection
+import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import com.storifyai.api.app.scene.port.driven.*
 import com.storifyai.api.infra.adapter.driven.mongo.entity.Project
@@ -17,33 +17,51 @@ import kotlinx.coroutines.flow.firstOrNull
 import org.bson.types.ObjectId
 import java.time.Instant
 
-class SceneMongo(db: MongoDatabase): RepositoryDriven {
-    private val col: MongoCollection<Scene> = db.getCollection<Scene>("scenes")
+class SceneMongo(private val client: MongoClient, private val db: MongoDatabase): RepositoryDriven {
+    private val col = db.getCollection<Scene>("scenes")
 
     override suspend fun save(userId: String, projectId: String, param: SaveParam): String {
-        val scene =  Scene(
-            userId = userId,
-            projectId = projectId,
-            setting = Setting(
-                isFull = param.setting.isFull,
-                background = param.setting.background
-            ),
-            prompt = Prompt(
-                characters = param.prompt.characters,
-                style = param.prompt.style,
-                background = param.prompt.background,
-                detail = param.prompt.detail
-            ),
-            createdDate = Instant.now(),
-            lastModifiedDate = Instant.now(),
-            deletedDate = null,
-        )
+        val scene = newSceneEntity(userId, projectId, param)
 
         val doc: InsertOneResult = col.insertOne(scene)
 
         return when {
             doc.wasAcknowledged() -> scene.id.toString()
             else -> throw IllegalStateException("Insert was not acknowledged")
+        }
+    }
+
+    override suspend fun bulkSave(userId: String, projectId: String, params: List<SaveParam>): List<String> {
+        val session = client.startSession()
+        try {
+            session.startTransaction()
+
+            val filter = Filters.and(
+                Filters.eq(Scene::userId.name, userId),
+                Filters.eq(Scene::projectId.name, projectId),
+                Filters.or(
+                    Filters.ne(Scene::deletedDate.name, null),
+                    Filters.exists(Scene::deletedDate.name, false),
+                )
+            )
+
+            val scenes = params.map {
+                newSceneEntity(userId, projectId, it)
+            }
+
+            col.deleteMany(filter)
+
+            val doc = col.insertMany(scenes)
+
+            session.commitTransaction()
+
+             when {
+                 doc.wasAcknowledged() -> return scenes.map { it.id.toString() }
+                 else -> throw IllegalStateException("Bulk insert was not acknowledged")
+            }
+        } catch (e: Exception) {
+            session.abortTransaction()
+            throw IllegalStateException("Bulk insert failed")
         }
     }
 
@@ -74,24 +92,23 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
             Updates.set(Scene::lastModifiedDate.name, now)
         )
 
-        val result: _UpdateResult = col.updateOne(filter, updates)
+        val result = col.findOneAndUpdate(filter, updates) ?: return throw IllegalStateException("Insert was not acknowledged")
 
-        return when {
-            result.wasAcknowledged() -> UpdateResult(
-                setting = SettingResult(
-                    isFull = param.setting.isFull,
-                    background = param.setting.background
-                ),
-                prompt = PromptResult(
-                    characters = param.prompt.characters,
-                    background = param.prompt.background,
-                    style = param.prompt.style,
-                    detail = param.prompt.detail
-                ),
-                updatedDate = now,
-            )
-            else -> throw IllegalStateException("Update was not acknowledged")
-        }
+        return UpdateResult(
+            imageURL = result.imageUrl,
+            imageReferenceId = result.imageReferenceId,
+            setting = SettingResult(
+                isFull = result.setting.isFull,
+                background = result.setting.background
+            ),
+            prompt = PromptResult(
+                characters = result.prompt.characters,
+                background = result.prompt.background,
+                style = result.prompt.style,
+                detail = result.prompt.detail
+            ),
+            updatedDate = now,
+        )
     }
 
     override suspend fun delete(userId: String, projectId: String, sceneId: String): String {
@@ -129,7 +146,7 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
         )
 
         val result: FindFlow<Scene> = col.find<Scene>(filter)
-            .sort(Sorts.descending(Project::createdDate.name))
+            .sort(Sorts.descending(Scene::number.name))
 
 
         result.collect {
@@ -162,6 +179,7 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
     override suspend fun findOneByReferenceId(userId: String, imageReferenceId: String): FindResult? {
         val filter = Filters.and(
             Filters.eq(Scene::userId.name, userId),
+            Filters.eq(Scene::imageReferenceId.name, imageReferenceId),
             Filters.or(
                 Filters.ne(Scene::deletedDate.name, null),
                 Filters.exists(Scene::deletedDate.name, false),
@@ -177,11 +195,36 @@ class SceneMongo(db: MongoDatabase): RepositoryDriven {
         }
     }
 
+    private fun newSceneEntity(userId: String, projectId: String, param: SaveParam): Scene {
+        return Scene(
+            userId = userId,
+            projectId = projectId,
+            imageReferenceId = param.imageReferenceId,
+            imageUrl = param.imageURL,
+            setting = Setting(
+                isFull = param.setting.isFull,
+                background = param.setting.background
+            ),
+            prompt = Prompt(
+                characters = param.prompt.characters,
+                style = param.prompt.style,
+                background = param.prompt.background,
+                detail = param.prompt.detail
+            ),
+            createdDate = Instant.now(),
+            lastModifiedDate = Instant.now(),
+            deletedDate = null,
+            number = param.number,
+        )
+    }
+
     private fun newFindResult(scene: Scene): FindResult {
         return FindResult(
             scene.id.toString(),
             scene.userId,
             scene.projectId,
+            scene.imageUrl,
+            scene.imageReferenceId,
             SettingResult(
                 isFull = scene.setting.isFull,
                 background = scene.setting.background

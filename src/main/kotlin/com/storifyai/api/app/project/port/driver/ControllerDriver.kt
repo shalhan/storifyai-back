@@ -7,7 +7,7 @@ interface ControllerDriver {
     suspend fun update(userId: String, projectId: String, request: UpdateRequest): UpdateResponse
     suspend fun delete(userId: String, projectId: String): String
     suspend fun findAll(userId: String): List<FindResponse>
-    suspend fun findById(userId: String, projectId: String): FindResponse
+    suspend fun findOneById(userId: String, projectId: String): FindResponse?
 }
 
 data class UpdateRequest(
@@ -22,6 +22,6 @@ data class UpdateResponse(
 
 data class SaveRequest(val title: String)
 
-data class SaveResponse(val projectId: String)
+data class SaveResponse(val id: String)
 
 data class FindResponse(val id: String, val userId: String, val title: String, val createdDate: Instant, val updatedDate: Instant, val deletedDate: Instant?)

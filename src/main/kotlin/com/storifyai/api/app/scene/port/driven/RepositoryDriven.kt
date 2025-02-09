@@ -4,6 +4,7 @@ import java.time.Instant
 
 interface RepositoryDriven {
     suspend fun save(userId: String, projectId: String, param: SaveParam): String
+    suspend fun bulkSave(userId: String, projectId: String, params: List<SaveParam>): List<String>
     suspend fun update(userId: String,  projectId: String, sceneId: String, param: UpdateParam): UpdateResult
     suspend fun delete(userId: String, projectId: String, sceneId: String): String
     suspend fun findManyByProjectId(userId: String, projectId: String): List<FindResult>
@@ -12,16 +13,24 @@ interface RepositoryDriven {
 }
 
 data class SaveParam(
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
+    val number: Int,
     val setting: SettingParam,
     val prompt: PromptParam,
 )
 
 data class UpdateParam(
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
     val setting: SettingParam,
     val prompt: PromptParam,
 )
 
 data class UpdateResult(
+    val number: Int,
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
     val setting: SettingResult,
     val prompt: PromptResult,
 
@@ -32,6 +41,9 @@ data class FindResult(
     val id: String,
     val userId: String,
     val projectId: String,
+    val number: Int,
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
     val setting: SettingResult,
     val prompt: PromptResult,
 

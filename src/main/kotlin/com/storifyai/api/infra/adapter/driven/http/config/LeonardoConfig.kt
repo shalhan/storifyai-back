@@ -8,8 +8,8 @@ import org.springframework.context.annotation.PropertySource
 @PropertySource("classpath:application.properties")
 data class LeonardoConfig (
     @Value("\${outbound.http.leonardoai.baseurl}")
-    val baseUrl: String,
+    val baseUrl: String = "",
 
     @Value("\${outbound.http.leonardoai.apiKey}")
-    val apiKey: String,
+    val apiKey: String = "",
 )

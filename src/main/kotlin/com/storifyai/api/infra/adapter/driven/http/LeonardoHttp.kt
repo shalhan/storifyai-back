@@ -6,11 +6,18 @@ import com.storifyai.api.app.imagegeneration.port.driven.OutboundDriven
 import com.storifyai.api.infra.adapter.driven.http.config.LeonardoConfig
 import com.storifyai.api.infra.adapter.driven.http.response.GenerateImageResponseLeonardo
 import com.storifyai.api.infra.adapter.driven.http.response.SdGenerationJob
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 
-class LeonardoHttp(private val httpClient: RestClient, private val config: LeonardoConfig): OutboundDriven {
+class LeonardoHttp(
+    @Autowired
+    private val httpClient: RestClient,
+
+    @Autowired
+    private val config: LeonardoConfig
+): OutboundDriven {
     override fun generateImage(param: GenerateParam): GenerateResult {
         val response = httpClient.post()
             .uri(URLEncoder.encode(config.baseUrl+"/generations"))
