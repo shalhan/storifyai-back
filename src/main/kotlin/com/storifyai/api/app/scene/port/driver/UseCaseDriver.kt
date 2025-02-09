@@ -3,42 +3,30 @@ package com.storifyai.api.app.scene.port.driver
 import java.time.Instant
 
 interface UseCaseDriver {
-    suspend fun save(userId: String, projectId: String, param: SaveParam): String
-    suspend fun update(userId: String, projectId: String, sceneId: String, param: UpdateParam): UpdateResult
-    suspend fun patch(userId: String, projectId: String, sceneId: String, param: PatchParam): PatchResult
-    suspend fun delete(userId: String, projectId: String, sceneId: String): String
-    suspend fun findOne(userId: String, projectId: String, sceneId: String): FindResult
-    suspend fun findOneByReferenceId(userId: String, imageReferenceId: String): FindResult
-    suspend fun findOneByProjectId(userId: String, projectId: String): List<FindResult>
+    suspend fun save(userId: String, projectId: String, params: List<SaveParam>): String
+    suspend fun update(userId: String, projectId: String, params: List<UpdateParam>): UpdateResult
+    suspend fun delete(userId: String, projectId: String): String
+    suspend fun findOne(userId: String, projectId: String): FindResult?
 }
 
 data class SaveParam(
+    val number: Int,
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
     val setting: SettingParam,
     val prompt: PromptParam
 )
 
 data class UpdateParam(
+    val number: Int,
+    val imageURL: String? = null,
+    val imageReferenceId: String? = null,
     val setting: SettingParam,
     val prompt: PromptParam,
 )
 
-data class PatchParam(
-    val imageURL: String? = null,
-    val imageReferenceId: String? = null,
-    val setting: SettingParam? = null,
-    val prompt: PromptParam? = null,
-)
-
 data class UpdateResult(
-    val setting: SettingResult,
-    val prompt: PromptResult,
-
-    val updatedDate: Instant,
-)
-
-data class PatchResult(
-    val setting: SettingResult,
-    val prompt: PromptResult,
+    val details: List<SceneDetail>,
 
     val updatedDate: Instant,
 )
@@ -47,13 +35,14 @@ data class FindResult(
     val id: String,
     val userId: String,
     val projectId: String,
-    val setting: SettingResult,
-    val prompt: PromptResult,
+    val details: List<SceneDetail>,
 
     val createdDate: Instant,
     val updatedDate: Instant,
     val deletedDate: Instant?
 )
+
+data class SceneDetail(val number: Int, val imageURL: String?, val imageReferenceId: String?, val setting: SettingResult, val prompt: PromptResult)
 
 data class SettingParam(val isFull: Boolean, val background: String)
 

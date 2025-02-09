@@ -22,6 +22,6 @@ data class UpdateResponse(
 
 data class SaveRequest(val title: String)
 
-data class SaveResponse(val projectId: String)
+data class SaveResponse(val id: String)
 
 data class FindResponse(val id: String, val userId: String, val title: String, val createdDate: Instant, val updatedDate: Instant, val deletedDate: Instant?)

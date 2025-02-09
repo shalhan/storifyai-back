@@ -11,14 +11,14 @@ class ImageGenerationUseCase(
     private val sceneUseCase: _SceneUseCase
 
 ) : UseCaseDriver {
-    override suspend fun generate(userId: String, projectId: String, sceneId: String, param: GenerateParam): GenerateResult {
-        val scene = sceneUseCase.findOne(userId, projectId, sceneId) ?: throw IllegalStateException("scene not found")
+    override suspend fun generate(userId: String, projectId: String, number: Int, param: GenerateParam): GenerateResult {
+        val scene = sceneUseCase.findOne(userId, projectId, number) ?: throw IllegalStateException("scene not found")
 
         // generate image
         val result = outboundAdapter.generateImage(_GenerateParam(
             userId = userId,
             projectId = projectId,
-            sceneId = sceneId,
+            number = number,
             generatedImageId = param.generatedImageId,
             prompt = param.prompt,
             width = param.width,
@@ -26,7 +26,7 @@ class ImageGenerationUseCase(
             numOfImages = param.numOfImages,
         ))
 
-        sceneUseCase.patch(userId, projectId, sceneId, _ScenePatchParam(
+        sceneUseCase.patch(userId, projectId, number, _ScenePatchParam(
             imageReferenceId = result.referenceId,
         ))
 

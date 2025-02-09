@@ -3,18 +3,24 @@ package com.storifyai.api.app.scene.port.driver
 import java.time.Instant
 
 interface ControllerDriver {
-    suspend fun save(userId: String, projectId: String, request: SaveRequest): SaveResponse
-    suspend fun update(userId: String, projectId: String, sceneId: String, request: UpdateRequest): UpdateResponse
-    suspend fun delete(userId: String, projectId: String, sceneId: String): DeleteResponse
-    suspend fun findManyByProjectId(userId: String, projectId: String): List<FindResponse>
+    suspend fun save(userId: String, projectId: String, request: List<SaveRequest>): SaveResponse
+    suspend fun update(userId: String, projectId: String, request: List<UpdateRequest>): UpdateResponse
+    suspend fun delete(userId: String, projectId: String): DeleteResponse
+    suspend fun findOne(userId: String, projectId: String): FindResponse
 }
 
 data class SaveRequest(
+    val imageURL: String?,
+    val imageReferenceId: String?,
+    val number: Int,
     val setting: SettingRequest,
     val prompt: PromptRequest,
 )
 
 data class UpdateRequest(
+    val number: Int,
+    val imageURL: String?,
+    val imageReferenceId: String?,
     val setting: SettingRequest,
     val prompt: PromptRequest,
 )
@@ -32,11 +38,9 @@ data class SaveResponse(val id: String)
 data class DeleteResponse(val id: String)
 
 data class FindResponse(
-    val id: String,
     val userId: String,
     val projectId: String,
-    val setting: SettingResponse,
-    val prompt: PromptResponse,
+    val details: List<SceneDetailResponse>,
 
     val createdDate: Instant,
     val updatedDate: Instant,
@@ -44,12 +48,11 @@ data class FindResponse(
 )
 
 data class UpdateResponse(
-    val id: String,
     val userId: String,
     val projectId: String,
-    val setting: SettingResponse,
-    val prompt: PromptResponse,
+    val details: List<SceneDetailResponse>,
 
     val updatedDate: Instant,
 )
 
+data class SceneDetailResponse(val number: Int, val imageURL: String?, val imageReferenceId: String?, val setting: SettingResponse, val prompt: PromptResponse)

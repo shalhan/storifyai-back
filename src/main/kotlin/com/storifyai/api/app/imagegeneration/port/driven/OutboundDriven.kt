@@ -7,7 +7,7 @@ interface OutboundDriven {
 data class GenerateParam(
     val userId: String,
     val projectId: String,
-    val sceneId: String,
+    val number: Int,
     val generatedImageId: String,
     val prompt: String,
     val width: Int,

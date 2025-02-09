@@ -1,8 +1,10 @@
 package com.storifyai.api.app.project.usecase
 
 import com.storifyai.api.app.project.port.driven.RepositoryDriven
+
 import com.storifyai.api.app.project.port.driver.FindResult
 import com.storifyai.api.app.project.port.driven.FindResult as _FindResult
+import com.storifyai.api.app.project.port.driven.UpdateParam as _UpdateParam
 import com.storifyai.api.app.project.port.driver.UseCaseDriver
 import com.storifyai.api.app.project.port.driver.UpdateParam
 import com.storifyai.api.app.project.port.driver.UpdateResult
@@ -14,7 +16,7 @@ class ProjectUseCase(private val repoAdapter: RepositoryDriven): UseCaseDriver {
     }
 
     override suspend fun update(userId: String, projectId: String, param: UpdateParam): UpdateResult {
-        val result = repoAdapter.findById(userId, projectId)
+        val result = repoAdapter.update(userId, projectId, _UpdateParam(param.title))
 
         return UpdateResult(title = result.title, updatedDate = result.updatedDate)
     }

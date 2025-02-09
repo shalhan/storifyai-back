@@ -1,7 +1,7 @@
 package com.storifyai.api.app.imagegeneration.port.driver
 
 interface UseCaseDriver {
-    suspend fun generate(userId: String, projectId: String, sceneId: String, param: GenerateParam): GenerateResult
+    suspend fun generate(userId: String, projectId: String, number: Int, param: GenerateParam): GenerateResult
     suspend fun save(userId: String, param: SaveParam): SaveResult
 }
 

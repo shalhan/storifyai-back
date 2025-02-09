@@ -11,17 +11,18 @@ data class Scene(
     val id: ObjectId = ObjectId(),
     val userId: String,
     val projectId: String,
-    val setting: Setting,
-    val prompt: Prompt,
+
+    val details: List<SceneDetail>,
 
     @CreatedDate
-    public val createdDate: Instant,
+    val createdDate: Instant,
 
     @LastModifiedDate
-    public val lastModifiedDate: Instant,
+    val lastModifiedDate: Instant,
 
-    public val deletedDate: Instant? = null
+    val deletedDate: Instant? = null
 )
 
+data class SceneDetail(val number: Int, val imageURL: String, val imageReferenceId: String, val setting: Setting, val prompt: Prompt)
 data class Setting(val isFull: Boolean, val background: String)
 data class Prompt(val characters: List<String>, val style: String, val background: String, val detail: String)
